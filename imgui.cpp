@@ -1277,7 +1277,7 @@ ImGuiIO::ImGuiIO()
 #else
     ConfigMacOSXBehaviors = false;
 #endif
-    ConfigInputTrickleEventQueue = true;
+    ConfigInputTrickleEventQueue = false;
     ConfigInputTextCursorBlink = true;
     ConfigInputTextEnterKeepActive = false;
     ConfigDragClickToInputText = false;
@@ -2116,7 +2116,7 @@ int ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* 
 
     // Copy at most 'len' bytes, stop copying at 0 or past in_text_end. Branch predictor does a good job here,
     // so it is fast even with excessive branching.
-    unsigned char s[4];
+    unsigned char s[4] = { 0, 0, 0, 0 };
     s[0] = in_text + 0 < in_text_end ? in_text[0] : 0;
     s[1] = in_text + 1 < in_text_end ? in_text[1] : 0;
     s[2] = in_text + 2 < in_text_end ? in_text[2] : 0;
@@ -5110,7 +5110,7 @@ void ImGui::Render()
     }
 
     // Add ImDrawList to render
-    ImGuiWindow* windows_to_render_top_most[2];
+    ImGuiWindow* windows_to_render_top_most[2] = { NULL, NULL };
     windows_to_render_top_most[0] = (g.NavWindowingTarget && !(g.NavWindowingTarget->Flags & ImGuiWindowFlags_NoBringToFrontOnFocus)) ? g.NavWindowingTarget->RootWindow : NULL;
     windows_to_render_top_most[1] = (g.NavWindowingTarget ? g.NavWindowingListWindow : NULL);
     for (ImGuiWindow* window : g.Windows)
@@ -8063,7 +8063,7 @@ static void ImGui::UpdateKeyRoutingTable(ImGuiKeyRoutingTable* rt)
     for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = (ImGuiKey)(key + 1))
     {
         const int new_routing_start_idx = rt->EntriesNext.Size;
-        ImGuiKeyRoutingData* routing_entry;
+        ImGuiKeyRoutingData* routing_entry = nullptr;
         for (int old_routing_idx = rt->Index[key - ImGuiKey_NamedKey_BEGIN]; old_routing_idx != -1; old_routing_idx = routing_entry->NextEntryIndex)
         {
             routing_entry = &rt->Entries[old_routing_idx];
@@ -8108,7 +8108,7 @@ ImGuiKeyRoutingData* ImGui::GetShortcutRoutingData(ImGuiKeyChord key_chord)
     //  - Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift);                // Not legal
     ImGuiContext& g = *GImGui;
     ImGuiKeyRoutingTable* rt = &g.KeysRoutingTable;
-    ImGuiKeyRoutingData* routing_data;
+    ImGuiKeyRoutingData* routing_data = nullptr;
     if (key_chord & ImGuiMod_Shortcut)
         key_chord = ConvertShortcutMod(key_chord);
     ImGuiKey key = (ImGuiKey)(key_chord & ~ImGuiMod_Mask_);
@@ -14438,7 +14438,7 @@ void ImGui::DebugNodeStorage(ImGuiStorage* storage, const char* label)
 void ImGui::DebugNodeTabBar(ImGuiTabBar* tab_bar, const char* label)
 {
     // Standalone tab bars (not associated to docking/windows functionality) currently hold no discernible strings.
-    char buf[256];
+    char buf[256] = "";
     char* p = buf;
     const char* buf_end = buf + IM_ARRAYSIZE(buf);
     const bool is_active = (tab_bar->PrevFrameVisible >= GetFrameCount() - 2);
