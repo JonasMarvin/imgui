@@ -7921,9 +7921,12 @@ ImGuiKeyData* ImGui::GetKeyData(ImGuiContext* ctx, ImGuiKey key)
         key = ConvertSingleModFlagToKey(ctx, key);
 
 #ifndef IMGUI_DISABLE_OBSOLETE_KEYIO
+#pragma warning(push)
+#pragma warning(disable: 33011)
     IM_ASSERT(key >= ImGuiKey_LegacyNativeKey_BEGIN && key < ImGuiKey_NamedKey_END);
     if (IsLegacyKey(key) && g.IO.KeyMap[key] != -1)
         key = (ImGuiKey)g.IO.KeyMap[key];  // Remap native->imgui or imgui->native
+#pragma warning(pop)
 #else
     IM_ASSERT(IsNamedKey(key) && "Support for user key indices was dropped in favor of ImGuiKey. Please update backend & user code.");
 #endif
@@ -8848,6 +8851,8 @@ void ImGui::SetNextFrameWantCaptureMouse(bool want_capture_mouse)
 }
 
 #ifndef IMGUI_DISABLE_DEBUG_TOOLS
+#pragma warning(push)
+#pragma warning(disable: 33010)
 static const char* GetInputSourceName(ImGuiInputSource source)
 {
     const char* input_source_names[] = { "None", "Mouse", "Keyboard", "Gamepad", "Clipboard" };
@@ -8860,6 +8865,7 @@ static const char* GetMouseSourceName(ImGuiMouseSource source)
     IM_ASSERT(IM_ARRAYSIZE(mouse_source_names) == ImGuiMouseSource_COUNT && source >= 0 && source < ImGuiMouseSource_COUNT);
     return mouse_source_names[source];
 }
+#pragma warning(pop)
 static void DebugPrintInputEvent(const char* prefix, const ImGuiInputEvent* e)
 {
     ImGuiContext& g = *GImGui;
@@ -14003,7 +14009,10 @@ void ImGui::ShowMetricsWindow(bool* p_open)
 #ifdef IMGUI_DISABLE_OBSOLETE_KEYIO
             struct funcs { static bool IsLegacyNativeDupe(ImGuiKey) { return false; } };
 #else
+#pragma warning(push)
+#pragma warning(disable: 33010)
             struct funcs { static bool IsLegacyNativeDupe(ImGuiKey key) { return key < 512 && GetIO().KeyMap[key] != -1; } }; // Hide Native<>ImGuiKey duplicates when both exists in the array
+#pragma warning(pop)
             //Text("Legacy raw:");      for (ImGuiKey key = ImGuiKey_KeysData_OFFSET; key < ImGuiKey_COUNT; key++) { if (io.KeysDown[key]) { SameLine(); Text("\"%s\" %d", GetKeyName(key), key); } }
 #endif
             Text("Keys down:");         for (ImGuiKey key = ImGuiKey_KeysData_OFFSET; key < ImGuiKey_COUNT; key = (ImGuiKey)(key + 1)) { if (funcs::IsLegacyNativeDupe(key) || !IsKeyDown(key)) continue;     SameLine(); Text(IsNamedKey(key) ? "\"%s\"" : "\"%s\" %d", GetKeyName(key), key); SameLine(); Text("(%.02f)", GetKeyData(key)->DownDuration); }
