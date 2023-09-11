@@ -4,6 +4,10 @@
 ## Dear ImGui artifacts
 imgui.ini
 
+## Build results
+bin
+bin-int
+
 ## General build artifacts
 *.o
 *.obj
